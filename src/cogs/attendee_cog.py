@@ -77,7 +77,10 @@ class Attendee(commands.Cog):
                 form_links = controls.find_all("a", href=True)
                 form_id = None
                 for link in form_links:
-                    if "view=update_form" in link["href"] or "view=list_entries" in link["href"]:
+                    if (
+                        "view=update_form" in link["href"]
+                        or "view=list_entries" in link["href"]
+                    ):
                         # get ?form=[123]
                         qs = parse_qs(urlparse(link["href"]).query)
                         if "form" in qs:
@@ -89,67 +92,83 @@ class Attendee(commands.Cog):
                     self.observed_form = {"id": form_id, "name": form_name}
                     self.previous_csv_content = None
                     self.event_pages[form_id] = [
-                        event_link, await self.find_event_image(event_link)]
+                        event_link,
+                        await self.find_event_image(event_link),
+                    ]
 
                     if not self.polling_task:
                         self.polling_task = self.poll.start()
                     await ctx.message.add_reaction("🆗")
                     await ctx.send(f"👀 [{form_name}]({event_link}) with ID: {form_id}")
-                    logging.info(f"[SignupDataCog] Now observing form: {form_name} (ID: {form_id})")
+                    logging.info(
+                        f"[SignupDataCog] Now observing form: {form_name} (ID: {form_id})"
+                    )
                     return
 
-        await ctx.send(f"Couldn't find form: {search_string}, do you have access to it?")
+        await ctx.send(
+            f"Couldn't find form: {search_string}, do you have access to it?"
+        )
         logging.warning(f"[SignupDataCog] Form not found: {search_string}")
 
     def count_entries(self, csv_content):
         return len(list(csv.reader(StringIO(csv_content)))[1:])
 
-    @tasks.loop(seconds=10) # dw about this it will be overwritten
+    @tasks.loop(seconds=10)  # dw about this it will be overwritten
     async def poll(self):
 
         if not self.observed_form:
             if random.randint(1, 1_000_000) == 69:
                 self.bot.get_channel(self.channel_id).send(
-                    "@here Host an event already...")
+                    "@here Host an event already..."
+                )
             return
 
         session_cog = await self.session_ready()
         session = session_cog.get_session()
 
         form_id = self.observed_form["id"]
-        csv_url = f"https://svcover.nl/signup?view=export_entries&form={
-            form_id}"
+        csv_url = f"https://svcover.nl/signup?view=export_entries&form={form_id}"
 
         try:
             response = session.get(csv_url)
             response.raise_for_status()
 
             current_csv_content = response.content.decode("utf-8")
-            if self.previous_csv_content and self.previous_csv_content != current_csv_content:
+            if (
+                self.previous_csv_content
+                and self.previous_csv_content != current_csv_content
+            ):
                 new_entries = self.get_csv_diff(
-                    self.previous_csv_content, current_csv_content)
+                    self.previous_csv_content, current_csv_content
+                )
                 if new_entries:
                     # message = f"@here, new attendee {self.observed_form['name']}:\n" + \
                     #         "\n".join(new_entries) + \
                     #         f"\nTotal: {self.count_entries(current_csv_content)}"
-                    embed = Embed(title="New Attendee",
-                                  description=f"in {
-                                      self.observed_form['name']}",
-                                  color=Color.from_str("#F6921D")
-                                  )
-                    embed.set_author(icon_url=os.getenv(
-                        "EMBED_IMAGE", "https://svcover.nl/images/favicon-270x270.png"),
-                                     name="🎉")
+                    embed = Embed(
+                        title="New Attendee",
+                        description=f"in {self.observed_form['name']}",
+                        color=Color.from_str("#F6921D"),
+                    )
+                    embed.set_author(
+                        icon_url=os.getenv(
+                            "EMBED_IMAGE",
+                            "https://svcover.nl/images/favicon-270x270.png",
+                        ),
+                        name="🎉",
+                    )
 
                     if metadata := self.event_pages.get(form_id):
                         embed.url = metadata[0]
                         embed.set_image(url=metadata[1])
-                        
-                    embed.add_field(name="Attendee",
-                                    value="\n".join(new_entries))
+
+                    embed.add_field(name="Attendee", value="\n".join(new_entries))
                     embed.add_field(
-                        name="Total", value=self.count_entries(current_csv_content))
-                    embed.set_footer(text=f"Cover Bot will ping in {self.polling_interval} seconds")
+                        name="Total", value=self.count_entries(current_csv_content)
+                    )
+                    embed.set_footer(
+                        text=f"Cover Bot will ping in {self.polling_interval} seconds"
+                    )
                     await self.bot.get_channel(self.channel_id).send(embed=embed)
                 else:
                     # Removed
@@ -175,7 +194,9 @@ class Attendee(commands.Cog):
         if self.polling_task:
             self.polling_task.cancel()
             self.polling_task = None
-        observed_form_name = self.observed_form["name"] if self.observed_form else "None"
+        observed_form_name = (
+            self.observed_form["name"] if self.observed_form else "None"
+        )
         self.observed_form = None
         self.previous_csv_content = None
         await ctx.send(f"Stopped observing form {observed_form_name}")
