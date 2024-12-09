@@ -1,4 +1,5 @@
 src/config.py
+*run_bot.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -166,3 +167,4 @@ src/config.py
 src/config.py
 src/config.py
 src/config.py
+src/env.sh
