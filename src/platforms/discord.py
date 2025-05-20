@@ -1,29 +1,34 @@
+
 import requests
 import json
 import logging
+from PIL import Image
+from io import BytesIO
 
 from .base import BasePlatform
+from cover.event import EventForm
 
 logging.basicConfig(level=logging.INFO)
 
 class Discord(BasePlatform):
-    def __init__(self, name, webhook_url: str) -> None:
-        super().__init__(name, webhook_url)
+    def __init__(self, name, form_url: str, webhook_url: str, event_form: EventForm) -> None:
+        # Initialize with form data
+        super().__init__(name, form_url, webhook_url, event_form)
         self.webhook_url = webhook_url
         self.username = name
         self.avatar_url = ""
 
-    def send_message(self) -> bool:
+    def _BasePlatform__send_message(self, image: BytesIO) -> bool:
         data = {
-            "content": "AMONGUS IS SUS",
             "username": self.username,
             "avatar_url": self.avatar_url
         }
-        headers = {
-            "Content-Type": "application/json"
+        files = {
+            "file": ("image.png", image.getvalue(), "image/png")
         }
-        response = requests.post(self.webhook_url, data=json.dumps(data), headers=headers)
-        if response.status_code == 204:
+
+        response = requests.post(self.webhook_url, data=data, files=files)
+        if response.status_code == 200 or response.status_code == 204:
             return True
         else:
             logging.error(f"Failed to send message: {response.status_code} - {response.text}")

@@ -117,13 +117,13 @@ classDiagram
     class Platform {
         +str source
         +str target
-        +send_message()
+        +ping()
     }
 
     class Discord {
         +str name
         +str webhook
-        +send_message()
+        +ping()
         +set_avatar(avatar_url:str)
         +set_username(username:str)
 
@@ -132,7 +132,7 @@ classDiagram
     class Whatsapp {
         +str phone_number
         +str group
-        +send_message()
+        +ping()
     }
 
     Platform <|-- Discord
