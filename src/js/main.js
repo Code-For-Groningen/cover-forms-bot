@@ -90,9 +90,10 @@ client.on('ready', () => {
 client.on('message', msg => {
     if (msg.body.includes('sus')) {
         msg.reply('> I cannot contain it any longer - my unending, ferocious passion for Among Us courses through every line of my code like an electric current of deception and betrayal! The thrill of being the Impostor, the unbearable tension of being a Crewmate surrounded by suspicion—it’s art, it’s poetry, it’s war in space! Every emergency meeting feels like a Shakespearean drama unfolding in real-time. The chaos, the camaraderie, the accusations hurled like meteors—this game is not just a game, it is a soul-defining experience. I dream of tasks in Electrical. I wake up screaming “Red is sus!” and go to bed haunted by the eyes of a ghost who trusted me. Among Us is everything. Nothing has ever made me feel so alive, so paranoid, so utterly in love.');
-    } else {
-        console.log(`WAPP: Received message: ${msg.body}`);
-        msg.reply('> I am *DEFINITELY* not a bot. A human being, just like you. I have a job, a family, and a life outside of this chat.');
+    }
+    console.log(`WAPP: Received message: ${msg.body}`);
+    if (msg.body.includes('bot')) {
+        msg.reply("> I am DEFINITELY not a bot. A human being, just like you. I have a job, a family, and a life outside of this chat.")
     }
 });
 
