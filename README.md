@@ -1,79 +1,150 @@
 Cover bot go brr.
 
-- [Installation](#installation)
-  - [Necessary environment variables](#necessary-environment-variables)
-  - [Example interaction with the script](#example-interaction-with-the-script)
-- [Dockerized version](#dockerized-version)
-- [Non-dockerized version](#non-dockerized-version)
-  - [Set the enviornment variables](#set-the-enviornment-variables)
-  - [Running the bot](#running-the-bot)
+- [Intro](#intro)
 - [Usage](#usage)
-  - [Commands](#commands)
+  - [Creating an event](#creating-an-event)
+  - [Main loop](#main-loop)
+- [Design](#design)
+  - [Platforms](#platforms)
+  - [Message](#message)
 
-## Installation
 
-```bash
-git clone https://github.com/Code-For-Groningen/cover-forms-bot.git
-cd cover-forms-bot
-```
+## Intro
+This bot is designed to be a simple way to get notifications whenever a user signs up for your Cover form. All you need to do to get the full functionality is to make sure you have access to the form on the Cover website and log in to your account (by passing credentials to the bot).
 
-### Necessary environment variables
+From there, you can decide whether to post notifications on Discord or on Whatsapp. The bot will automatically check for new signups every 5 minutes and send a message to the specified channel if there are any new signups. You can also specify a custom message to be sent along with the notification.
 
-- `DISCORD_BOT_TOKEN` - [Tutorial](https://www.writebots.com/discord-bot-token/)
-- `COVER_EMAIL`
-- `COVER_PASSWORD`
-- `COVER_CHANNEL_ID` - [Tutorial](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-)
-- `POLL_INTERVAL` (optional, default: 60s)
-- `EMBED_IMAGE` (author of embeds, default is cover logo)
+> [!Important]
+> In order to not get banned on Whatsapp, a random quote will be sent every time the bot sends a message. I advise you not to change this behaviour.
 
-Set them in the environment. Use the startup script if you'd like.
-
-> [!WARNING]
-> The script produces another script which only works on Unix-like systems. You have to run the bot manually or use [docker](#dockerized-version) on Windows.
-> If you're using it, check out [the example interaction](#example-interaction) below.
-
-### Example interaction with the script
-
-```bash
-$ cd src
-$ python initial.py
-Discord bot token: # This is supposed to not be visible while typing
-Email (svcover.nl): amo@ng.us
-Password: # This too
-Channel ID to post in:696969696969
-Polling interval (seconds):5
-Embed image URL:https://raw.githubusercontent.com/CircuitReeRUG/branding/refs/heads/main/mascot/circuitree_waving.png
-```
-
-## Dockerized version
-
-Change the environment variables in the `docker-compose.yml` file.
-
-```bash
-docker compose up -d
-```
-
-## Non-dockerized version
-
-### Set the enviornment variables
-
-Using the script or set them manually.
-
-### Running the bot
-
-```bash
-$ pip install -r requirements.txt
->> ...
-$ python3 start.py # Requires Python 3.9+
-```
 
 ## Usage
 
-[Invite the bot to your server](https://discordpy.readthedocs.io/en/stable/discord.html).
+### Creating an event
+You need to initialize a `Form` object:
 
-### Commands
+```python
+from .cover.cover import Cover
+from .cover.form import Form
 
-| Command                  | What do it do?                                                |
-| ------------------------ | ------------------------------------------------------------- |
-| !observe <name of event> | begins observing the event, pinging and showing new attendees |
-| !stop_observe            | stops observing the event                                     |
+cover = Cover(email="email", password="password")
+form = form(
+    name="Event 1",
+    url="https://svcover.nl/sign_up/123465/entries",
+    cover=cover, # Pass the Cover object here
+    platforms=[
+        {
+            "source": "discord",
+            "target": "webhook",
+            "name": "Guild 1",
+            "webhook": "https://discord.com/api/webhooks/1234567890/abcdefghijklmnopqrstuvwxyz",
+        },
+        {
+            "source": "whatsapp",
+            "target": "group",
+            "phone_number": "+1234567890",
+            "groups": [
+                {
+                    "name": "Group 1",
+                }
+            ]
+        }
+    ]
+)
+```
+If you want to save the event to a json file, you can do so by calling the `save` method:
+
+```python
+form.save()
+```
+
+Where a json file (`forms.json`) is created/updated of the form:
+
+```json
+{
+  "forms": [
+    {
+      "name": "Event 1",
+      "url": "https://svcover.nl/sign_up/123465/entries",
+      "discord": {
+        "guilds": [
+          {
+            "name": "Guild 1",
+            "webhook": "https://discord.com/api/webhooks/1234567890/abcdefghijklmnopqrstuvwxyz",
+          }
+        ]
+      },
+      "whatsapp": {
+        "phone_number": "+1234567890",
+        "groups": [
+          {
+            "name": "Group 1",
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+### Main loop
+The main loop of the bot is designed to run indefinitely and check for new signups every 5 minutes. And execute the forms in the list. You can either pass list of `Form` objects or load from a json to execute `run` method:
+
+```python 
+from .cover.cover import Cover
+from .cover.form import Form
+import time
+
+cover = Cover(email="email", password="password")
+# events = [Form(), Form(), Form()] <- List of form objects
+events = Cover.load_events() # Load events from json file (default: forms.json)
+while True:
+  try:
+    for event in events:
+        event.run()
+    time.sleep(300)
+  except KeyboardInterrupt:
+    print("Exiting...")
+    break
+```
+
+## Design
+
+### Platforms
+We use inheritance to describe the platforms:
+```mermaid
+classDiagram
+    class Platform {
+        +str source
+        +str target
+        +send_message()
+    }
+
+    class Discord {
+        +str name
+        +str webhook
+        +send_message()
+        +set_avatar(avatar_url:str)
+        +set_username(username:str)
+
+    }
+
+    class Whatsapp {
+        +str phone_number
+        +str group
+        +send_message()
+    }
+
+    Platform <|-- Discord
+    Platform <|-- Whatsapp
+```
+
+### Message
+To achieve uniformity, we generate an image comprised of:
+- The banner of the form
+- Date of new signup
+- Total number of signups
+
+With the addition of a random quote sent on whatsapp.
+
+The image generation is handled by the `img` module.
