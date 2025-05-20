@@ -171,3 +171,4 @@ PyWhatKit_DB.txt
 node_modules/
 
 *.wwebjs*
+.env
