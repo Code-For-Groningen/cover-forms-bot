@@ -27,6 +27,8 @@ open a browser, it's texting alright!
 hijacking input - oh what a sight!
 fuck you meta, for this stupid ass fight!
 
+javascript python ipc is a task for the strong,
+it got me and my walls' voices, singing along!
 We should be getting API keys, control our bots, running all night!
 But noooo, the "business accounts" are ones who are priviledged with that
 
