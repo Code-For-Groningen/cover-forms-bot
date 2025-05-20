@@ -35,7 +35,6 @@ class Cover:
         value_attr_start = r.text.find('value="', csrf_token_start) + len('value="')
         csrf_token_end = r.text.find('" >', value_attr_start)
         csrf_token = r.text[value_attr_start:csrf_token_end]
-
         if not csrf_token:
             raise ValueError("CSRF token not found")
 
@@ -50,6 +49,7 @@ class Cover:
 
         login_resp = self.session.post(url + "?referrer=/", data=payload, headers={"User-Agent": self.user_agent})
         if not self.check_login():
+            logging.info("Login response: %s", login_resp.text)
             raise ValueError("Login failed. Check credentials or if the site structure has changed.")
         logging.info("Logged in to Cover successfully.")
 

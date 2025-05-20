@@ -4,7 +4,15 @@ import logging
 from cover.cover import Cover
 from cover.form import Form
 from platforms.discord import Discord
+from platforms.wapp import Wapp
 from cover.event import EventForm
+
+# Example values:
+FORM_URL = "https://svcover.nl/sign_up/501/entries"
+FORM_NAME = "Cover Form 501"
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/12345/1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+WHATSAPP_GROUP_ID = "group asdf"
+
 
 # Set up logging
 logging.basicConfig(
@@ -21,28 +29,22 @@ def main():
     # Initialize Cover client
     cover = Cover(username=cover_email, password=cover_password)
     
-    # Form and webhook configuration
-    form_url = "https://svcover.nl/sign_up/501/entries"
-    form_name = "Cover Form 501"
-    webhook_url = "https://discord.com/api/webhooks/1374263596099440772/3jhvb1RgMzB7A2hzpoLK4IlVFG8aqxGXFXai9LMDOK6Kqo9q3jIrlC0j7iM5u5W5vwsL"
+    # Use global constants for form and webhook configuration
+    event_form = EventForm(FORM_NAME, FORM_URL, cover)
     
-    # First create the event form
-    event_form = EventForm(form_name, form_url, cover)
+    discord_platform = Discord(FORM_NAME, FORM_URL, DISCORD_WEBHOOK_URL, event_form)
+    whatsapp_platform = Wapp(FORM_NAME, FORM_URL, WHATSAPP_GROUP_ID, event_form, os.getenv("WAPP_PID"))
     
-    # Initialize Discord platform with the event form
-    discord_platform = Discord(form_name, form_url, webhook_url, event_form)
-    
-    # Create form with the platform
     form = Form(
-        name=form_name,
-        url=form_url,
+        name=FORM_NAME,
+        url=FORM_URL,
         cover=cover,
-        platforms=[discord_platform]
+        platforms=[discord_platform, whatsapp_platform]
     )
 
     # Main loop - check for updates regularly
     logger.info("Starting Cover Form Bot")
-    logger.info(f"Monitoring form at {form_url}")
+    logger.info(f"Monitoring form at {FORM_URL}")
     
     try:
         while True:
@@ -54,7 +56,6 @@ def main():
         logger.info("Bot stopped by user")
     except Exception as e:
         logger.error(f"Error occurred: {e}", exc_info=True)
-        # You might want to add some retry logic here
 
 if __name__ == "__main__":
     main()
