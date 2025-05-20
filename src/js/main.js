@@ -26,6 +26,19 @@ client.on('qr', (qr) => {
 });
 
 client.on('ready', () => {
+    // send the python process a "IAMREADY" message and wait until file is cleared for handshake
+    try {
+        fs.writeFileSync(tempCommandFile, 'IAMREADY', { mode: 0o600 });
+        console.log('WAPP: Sent IAMREADY message, waiting for handshake...');
+        while (fs.readFileSync(tempCommandFile, 'utf8').trim() !== '') {
+            // busy wait
+        }
+        console.log('WAPP: Handshake complete.');
+    }
+    catch (error) {
+        console.error('WAPP: Error sending IAMREADY:', error);
+    }
+
     console.log('WAPP: Client is ready!');
     console.log(`WAPP: Watching for commands in: ${tempCommandFile}`);
     
