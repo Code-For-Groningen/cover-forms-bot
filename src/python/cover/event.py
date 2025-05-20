@@ -2,6 +2,9 @@ from typing import Protocol, List
 import requests
 from bs4 import BeautifulSoup
 from abc import ABC, abstractmethod
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 class EventProtocol(ABC):
     """Base protocol for handling event notifications"""
@@ -34,8 +37,7 @@ class EventForm:
         r.raise_for_status()
         
         soup = BeautifulSoup(r.text, "html.parser")
-        form_id = self.url.strip('/').split('/')[-1]
-
+        form_id = self.url.strip('/').split('/')[-2]
         form_rows = soup.select("tr")
         event_url = None
         for row in form_rows:
@@ -45,6 +47,8 @@ class EventForm:
                 if event_link:
                     event_url = "https://svcover.nl" + event_link['href']
                     break
+        if not event_url:
+            logging.info(f"No event URL found for form ID: {form_id}")
 
         if not event_url:
             raise ValueError(f"Could not find event URL for form ID: {form_id}")
