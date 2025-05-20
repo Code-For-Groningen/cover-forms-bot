@@ -66,8 +66,8 @@ client.on('ready', () => {
             // Get all chats
             const chats = await client.getChats();
             
-            // Find the group chat with the specified name
-            const targetChat = chats.find(chat => chat.name === channelName);
+            // partial search
+            const targetChat = chats.find(chat => chat.name.toLowerCase().includes(channelName.toLowerCase()));
             
             if (targetChat) {
                 const media = MessageMedia.fromFilePath(imagePath);
