@@ -10,6 +10,4 @@ export WAPP_PID=$!
 export COVER_EMAIL="EMAIL-HERE"
 export COVER_PASSWORD="PASSWORD-HERE"
 
-cd python && python main.py
-
-kill $WAPP_PID 2>/dev/null
+cd python && python main.py && kill $WAPP_PID 2>/dev/null
