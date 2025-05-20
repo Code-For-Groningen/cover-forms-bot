@@ -10,7 +10,7 @@ from cover.event import EventForm
 # Example values:
 FORM_URL = "https://svcover.nl/sign_up/501/entries"
 FORM_NAME = "Cover Form 501"
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/12345/1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1374263596099440772/3jhvb1RgMzB7A2hzpoLK4IlVFG8aqxGXFXai9LMDOK6Kqo9q3jIrlC0j7iM5u5W5vwsL"
 WHATSAPP_GROUP_ID = "group asdf"
 
 
