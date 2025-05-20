@@ -8,14 +8,18 @@ import os
 import signal
 from time import sleep
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 class Wapp(BasePlatform):
     def __init__(self, source: str, form_url:str, target: str, event:Event, js_pid:int) -> None:
         super().__init__(source, form_url, target, event)
         self.target = target
         if not js_pid:
             raise ValueError("JavaScript process ID is required for Wapp platform.")
-        self.js_pid = js_pid
-
+        self.js_pid = int(js_pid) # docker complained
+        logging.info(f"JavaScript PID: {self.js_pid}")
+        
     def _BasePlatform__send_message(self, image: BytesIO) -> bool:
         try:
             # save the image to a temporary file
@@ -25,13 +29,13 @@ class Wapp(BasePlatform):
             
             response = requests.get("https://www.buzzwordipsum.com/buzzwords?format=html&paragraphs=1&type=words")
             random_text = response.text.replace("<p>", "").replace("</p>", "")
-            random_words = random_text.split(",")
+            random_words = random_text.split(" ")
             message = " ".join(random_words[:5]).strip()
             
             image_path = os.path.abspath("temp_image.png")
             command = f'"{self.target}" {image_path} "{message}"'
             
-            temp_command_file = f"/tmp/wapp_command_{self.js_pid}.txt"
+            temp_command_file = f"/tmp/wapp_command.txt"
             with open(temp_command_file, "w") as f:
                 f.write(command)
             

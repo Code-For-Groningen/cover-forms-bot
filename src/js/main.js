@@ -2,14 +2,13 @@ const { Client, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 
-
 const client = new Client({
     puppeteer: {
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
     }
 });
 
-const tempCommandFile = `/tmp/wapp_command_${process.pid}.txt`;
+const tempCommandFile = `/tmp/wapp_command.txt`; // fuck being extensible, we love static pipes
 
 // Create the pipe if it doesn't exist
 try {
