@@ -1,12 +1,7 @@
 Cover bot go brr.
 
 - [Intro](#intro)
-- [Usage](#usage)
-  - [Creating an event](#creating-an-event)
-  - [Main loop](#main-loop)
-- [Design](#design)
-  - [Platforms](#platforms)
-  - [Message](#message)
+- [a poem to Meta and Whatsapp](#a-poem-to-meta-and-whatsapp)
 
 
 ## Intro
@@ -17,134 +12,21 @@ From there, you can decide whether to post notifications on Discord or on Whatsa
 > [!Important]
 > In order to not get banned on Whatsapp, a random quote will be sent every time the bot sends a message. I advise you not to change this behaviour.
 
+> [!Note]
+> docs W.I.P.
 
-## Usage
-
-### Creating an event
-You need to initialize a `Form` object:
-
-```python
-from .cover.cover import Cover
-from .cover.form import Form
-
-cover = Cover(email="email", password="password")
-form = form(
-    name="Event 1",
-    url="https://svcover.nl/sign_up/123465/entries",
-    cover=cover, # Pass the Cover object here
-    platforms=[
-        {
-            "source": "discord",
-            "target": "webhook",
-            "name": "Guild 1",
-            "webhook": "https://discord.com/api/webhooks/1234567890/abcdefghijklmnopqrstuvwxyz",
-        },
-        {
-            "source": "whatsapp",
-            "target": "group",
-            "phone_number": "+1234567890",
-            "groups": [
-                {
-                    "name": "Group 1",
-                }
-            ]
-        }
-    ]
-)
+## a poem to Meta and Whatsapp
 ```
-If you want to save the event to a json file, you can do so by calling the `save` method:
+Roses are red,
+Violets are blue,
+Meta is bad,
+Whatsapp is too!
 
-```python
-form.save()
-```
+pywhatkit, what a delight!
+open a browser, it's texting alright!
+hijacking input - oh what a sight!
+fuck you meta, for this stupid ass fight!
 
-Where a json file (`forms.json`) is created/updated of the form:
+We should be getting API keys, control our bots, running all night!
+But noooo, the "business accounts" are ones who are priviledged with that
 
-```json
-{
-  "forms": [
-    {
-      "name": "Event 1",
-      "url": "https://svcover.nl/sign_up/123465/entries",
-      "discord": {
-        "guilds": [
-          {
-            "name": "Guild 1",
-            "webhook": "https://discord.com/api/webhooks/1234567890/abcdefghijklmnopqrstuvwxyz",
-          }
-        ]
-      },
-      "whatsapp": {
-        "phone_number": "+1234567890",
-        "groups": [
-          {
-            "name": "Group 1",
-          }
-        ]
-      }
-    }
-  ]
-}
-```
-
-### Main loop
-The main loop of the bot is designed to run indefinitely and check for new signups every 5 minutes. And execute the forms in the list. You can either pass list of `Form` objects or load from a json to execute `run` method:
-
-```python 
-from .cover.cover import Cover
-from .cover.form import Form
-import time
-
-cover = Cover(email="email", password="password")
-# events = [Form(), Form(), Form()] <- List of form objects
-events = Cover.load_events() # Load events from json file (default: forms.json)
-while True:
-  try:
-    for event in events:
-        event.run()
-    time.sleep(300)
-  except KeyboardInterrupt:
-    print("Exiting...")
-    break
-```
-
-## Design
-
-### Platforms
-We use inheritance to describe the platforms:
-```mermaid
-classDiagram
-    class Platform {
-        +str source
-        +str target
-        +ping()
-    }
-
-    class Discord {
-        +str name
-        +str webhook
-        +ping()
-        +set_avatar(avatar_url:str)
-        +set_username(username:str)
-
-    }
-
-    class Whatsapp {
-        +str phone_number
-        +str group
-        +ping()
-    }
-
-    Platform <|-- Discord
-    Platform <|-- Whatsapp
-```
-
-### Message
-To achieve uniformity, we generate an image comprised of:
-- The banner of the form
-- Date of new signup
-- Total number of signups
-
-With the addition of a random quote sent on whatsapp.
-
-The image generation is handled by the `img` module.
