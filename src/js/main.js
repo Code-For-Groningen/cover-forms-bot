@@ -2,7 +2,13 @@ const { Client, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 
-const client = new Client();
+
+const client = new Client({
+    puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    }
+});
+
 const tempCommandFile = `/tmp/wapp_command_${process.pid}.txt`;
 
 // Create the pipe if it doesn't exist

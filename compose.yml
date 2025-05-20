@@ -1,0 +1,11 @@
+services:
+  cover-forms-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - COVER_EMAIL=${COVER_EMAIL}
+      - COVER_PASSWORD=${COVER_PASSWORD}
+    volumes:
+      - ./data:/app/src/js/.wwebjs_auth
+    restart: unless-stopped
