@@ -166,3 +166,8 @@ src/config.py
 src/config.py
 src/config.py
 src/env.sh
+PyWhatKit_DB.txt
+
+node_modules/
+
+*.wwebjs*
