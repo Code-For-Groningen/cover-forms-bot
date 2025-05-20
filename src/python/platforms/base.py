@@ -20,14 +20,26 @@ class BasePlatform(ABC):
         else:
             self.banner_url = None
         
-    def ping(self, message="New attendee") -> bool:
+    def ping(self, tagline="New attendee", image:str="", message="") -> bool:
         """
         Send a message to the target platform.
         """
-        return self.__send_message(self.__create_image(message))
+        if not image:
+            image = self.__create_image(tagline)
+        else:
+            if isinstance(image, str):
+                response = requests.get(image)
+                if response.status_code == 200:
+                    image = BytesIO(response.content)
+                else:
+                    raise ValueError(f"Failed to retrieve image from URL: {image}")
+            elif not isinstance(image, BytesIO):
+                raise ValueError("Image must be a URL or a BytesIO object.")
+
+        return self.__send_message(image, message)
 
     @abstractmethod
-    def __send_message(self, image: BytesIO) -> bool:
+    def __send_message(self, image: BytesIO, message:str) -> bool:
         pass
 
     def __create_image(self, message: str):

@@ -17,11 +17,15 @@ class Discord(BasePlatform):
         self.webhook_url = webhook_url
         self.username = name
         self.avatar_url = ""
+        self.ping(tagline="Hi! I am **definitely** not a bot! I'm on Discord now!",
+                  image="https://static.wikia.nocookie.net/among-us-wiki/images/1/16/Blue.png/revision/latest?cb=20211122214500",
+                  message="Hi! I am **definitely** not a bot! I'm on Discord now!")
 
-    def _BasePlatform__send_message(self, image: BytesIO) -> bool:
+    def _BasePlatform__send_message(self, image: BytesIO, message:str) -> bool:
         data = {
             "username": self.username,
-            "avatar_url": self.avatar_url
+            "avatar_url": self.avatar_url,
+            "content": message
         }
         files = {
             "file": ("image.png", image.getvalue(), "image/png")
