@@ -19,12 +19,17 @@ class Form:
         logging.debug(f"Attendees: {self.attendees}")
 
     def run(self) -> None:
-        # check for difference in attendees
         new_attendees = self.__check_event()
-        if new_attendees != self.attendees:
-            self.attendees = new_attendees
+        
+        old_attendees = set(str(attendee) for attendee in self.attendees)
+        new_attendees = [attendee for attendee in new_attendees if str(attendee) not in old_attendees]
+        
+        if new_attendees:
+            self.attendees.extend(new_attendees)
             self.form.attendee_count = len(self.attendees)
+            self.form.latest_attendees = new_attendees
             self.event.process()
+
 
     def __parse_csv(self, filename: str="attendees.csv") -> list[str]:
         """

@@ -23,6 +23,14 @@ class EventForm:
         self.cover = cover
         self.attendee_count = 0
         self.banner_url = None
+        self.latest_attendees = None
+        self.notifiers = []
+
+    def add_notifier(self, notifier: EventProtocol) -> None:
+        """Add a notifier to the event form."""
+        self.notifiers.append(notifier)
+
+    
     
     def find_banner(self) -> str:
         """Find the banner image for the event."""
@@ -76,4 +84,11 @@ class Event:
         """process event data and notify protocols"""
         for protocol in self.supportedProtocols:
             protocol.handleEvent(self.form)
-    
+        
+        # notify all notifiers about the latest attendees
+        if self.form.latest_attendees and self.form.notifiers:
+            for notifier in self.form.notifiers:
+                try:
+                    notifier.notify(self.form.latest_attendees, self.form)
+                except Exception as e:
+                    logging.error(f"Notifier {type(notifier).__name__} failed: {e}")

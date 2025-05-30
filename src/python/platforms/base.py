@@ -20,10 +20,11 @@ class BasePlatform(ABC):
         else:
             self.banner_url = None
         
-    def ping(self, tagline="New attendee", image:str="", message="") -> bool:
+    def ping(self, tagline, image:str=None, message="") -> bool:
         """
         Send a message to the target platform.
         """
+
         if not image:
             image = self.__create_image(tagline)
         else:
